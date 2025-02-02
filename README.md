@@ -4,11 +4,7 @@ Ensemble testing for web accessibility
 
 ## Introduction
 
-Testarido is an application for automated web accessibility testing.
-
-The purposes of Testarido are to:
-- provide programmatic access to accessibility tests defined by several tools
-- facilitate the integration of the reports of the tools into a unified report
+Testarido is an application for automated web accessibility testing. It lets you specify a _target_, namely a web page, to be tested. It performs up to a thousand different accessibility tests, defined by eleven different tools, on the target. It then produces a report describing the results of the tests.
 
 ### Testarido and Testaro
 
@@ -21,10 +17,10 @@ Testaro is described in two papers:
 The need for multi-tool integration, and its costs, are discussed in [Accessibility Metatesting: Comparing Nine Testing Tools](https://arxiv.org/abs/2304.07591).
 
 Testaro and Testarido differ in their strategies for conducting tests:
-- Testaro uses its Playwright dependency to launch and control web browsers, perform operations, conduct tests, and record results. Regardless of how the test was designed to interact with a web page, Testaro opens the page with Playwright and makes the required aspects of that Playwright page available to the test.
-- Testarido does not depend on Playwright. Testarido does whatever a test requires in order to make a web page available to that test.
+- Testaro uses its Playwright dependency to launch and control web browsers, perform operations, conduct tests, and record results. Regardless of how a test was designed to interact with a target, Testaro creates a Playwright page, potentially modifies the page, and then makes the required aspects of that page available, as a target, to the test.
+- Testarido does not depend on Playwright. Testarido does whatever a test requires in order to make a target available to that test.
 
-Testaro was designed to be a workstation-based agent, because some of the tests performed by Testaro simulate the use of a web browser on a workstation. However, Testaro can be installed under a MacOS, Windows, Debian, or Ubuntu operating system. Research on the deployment of Testaro in a server environment is under way. One of the findings is that Playwright throws errors if an application that has Testaro as a dependency is containerized before deployment. Because containerization is commonly a mandatory feature of deployment pipelines, this interaction can make Testaro useless as a server-hosted package even when it otherwise might perform correctly. Testarido is a response to this limitation. The intent of Testarido is to be similar to Testaro but to be server-deployable in a container.
+Testaro was designed to be a workstation-based agent, because some of the tests performed by Testaro simulate the use of a web browser on a workstation. Testaro can be installed under a MacOS, Windows, Debian, or Ubuntu operating system, so it might also be deployed in a server environment. Exploratory research on this possibility has found that Playwright throws errors if an application that has Testaro as a dependency is containerized before deployment. Containerization is sometimes a mandatory feature of deployment pipelines, so this failure can make Testaro useless as a server-hosted package even when it otherwise might perform correctly. Testarido is a response to this limitation. The intent of Testarido is to offer functionality similar to that of Testaro, but to be server-deployable in a container.
 
 ### How Testarido works
 
@@ -53,24 +49,24 @@ Testarido uses:
 - [get-xpath](https://www.npmjs.com/package/get-xpath) to retrieve XPaths of elements when tests do not do so
 - [pixelmatch](https://www.npmjs.com/package/pixelmatch) to measure motion when tests require this
 
-Testarido performs tests of these _tools_:
-- [Accessibility Checker](https://www.npmjs.com/package/accessibility-checker) (IBM)
-- [Alfa](https://alfa.siteimprove.com/) (Siteimprove)
-- [ASLint](https://www.npmjs.com/package/@essentialaccessibility/aslint) (eSSENTIAL Accessibility)
-- [Axe](https://www.npmjs.com/package/axe-playwright) (Deque)
-- [Editoria11y](https://github.com/itmaybejj/editoria11y) (Princeton University)
-- [HTML CodeSniffer](https://www.npmjs.com/package/html_codesniffer) (Squiz Labs)
-- [Nu Html Checker](https://github.com/validator/validator) (World Wide Web Consortium)
-- [QualWeb](https://www.npmjs.com/package/@qualweb/core) (University of Lisbon)
-- [Testaro](https://www.npmjs.com/package/testaro) (CVS Health)
-- [WallyAX](https://www.npmjs.com/package/@wally-ax/wax-dev) (Wally Solutions)
-- [WAVE](https://wave.webaim.org/api/) (WebAIM)
+Testarido performs tests of an ensemble of eleven _tools_. Each tool has an ID. The tools are:
+- `ibm`: [Accessibility Checker](https://www.npmjs.com/package/accessibility-checker) (IBM)
+- `alfa`: [Alfa](https://alfa.siteimprove.com/) (Siteimprove)
+- `aslint`: [ASLint](https://www.npmjs.com/package/@essentialaccessibility/aslint) (eSSENTIAL Accessibility)
+- `axe`: [Axe](https://www.npmjs.com/package/axe-playwright) (Deque)
+- `ed11y`: [Editoria11y](https://github.com/itmaybejj/editoria11y) (Princeton University)
+- `htmlcs`: [HTML CodeSniffer](https://www.npmjs.com/package/html_codesniffer) (Squiz Labs)
+- `nu`: [Nu Html Checker](https://github.com/validator/validator) (World Wide Web Consortium)
+- `qual`: [QualWeb](https://www.npmjs.com/package/@qualweb/core) (University of Lisbon)
+- `testarido`: [Testarido](https://www.npmjs.com/package/testarido) (CVS Health and Jonathan Robert Pool)
+- `wax`: [WallyAX](https://www.npmjs.com/package/@wally-ax/wax-dev) (Wally Solutions)
+- `wave`: [WAVE](https://wave.webaim.org/api/) (WebAIM)
 
 Some of the tests of Testarido are designed to act as approximate alternatives to tests of vulnerable, restricted, or no longer available tools. In all such cases the Testarido rules are independently designed and implemented, without reference to the code of the tests that inspired them.
 
 ## Rules
 
-Each test of a tool implements a _rule_ of that tool. A rule typically defines what makes an artifact successful or unsuccessful in some way. More generally, however, a rule defines the criteria for arriving at some result, and the result can be something other than success or failure. A rule might, for example, classify a web page. In total, the eleven tools currently integrated into Testarido define more than a thousand rules. The latest tabulation of tool rules, excluding those that have been deprecated by Testilo, is:
+Each test of a tool implements a _rule_ of that tool. A rule typically defines what makes an artifact successful or unsuccessful in some way. More generally, however, a rule defines the criteria for arriving at some result, and the result can be success, failure, or something else. A rule might, for example, classify a web page as containing or not containing a form. In total, the eleven tools currently integrated into Testarido define more than a thousand rules. The latest tabulation of tool rules, excluding those that have been deprecated by Testilo, is:
 
 ```
 Accessibility Checker: 93
@@ -87,7 +83,7 @@ WAVE: 60
 total: 1006
 ```
 
-Some of the tools are under active development, and their rule counts change over time.
+Some of the tools are under active development, and their rule counts can change over time.
 
 ## Code organization
 
@@ -96,10 +92,6 @@ The main directories containing code files are:
 - `tests`: files containing the code defining particular tests
 - `procs`: shared procedures
 - `validation`: code and artifacts for the validation of the Testaro tool
-
-## System requirements
-
-Version 18 or later of [Node.js](https://nodejs.org/en/).
 
 ## Installation
 
@@ -133,13 +125,15 @@ Once it is installed as a dependency, your application can use Testarido feature
 
 ### Prerequisites
 
+Testarido requires version 18 or later of [Node.js](https://nodejs.org/en/).
+
 To make the Testarido features work, you will also need to provide the environment variables described below under “Environment variables”.
 
 All of the tests that Testarido can perform are free of cost, except those performed by the WallyAX and WAVE tools. The owners of those tools issue API keys. A free initial allowance of usage may be granted to you with a new API key. Before using Testarido to perform their tests, get your API keys for [WallyAX](mailto:technology@wallyax.com) and [WAVE](https://wave.webaim.org/api/). Then use those API keys to define environment variables, as described below under “Environment variables”.
 
 ## Jobs
 
-A _job_ is an object that specifies what Testarido is to do. As Testarido performs a job, Testarido reports results by adding data to the job. In doing this, Testarido converts the job into a _report_.
+A _job_ is an object that tells Testarido what to do. As Testarido performs a job, Testarido reports results by adding data to the job. In doing this, Testarido converts the job into a _report_. Each individual piece of work to be done is an _act_.
 
 ### Example
 
@@ -174,7 +168,7 @@ Here is an example of a job:
     },
     {
       type: 'tool',
-      which: 'qualWeb',
+      which: 'qual',
       withNewContent: false,
       rules: ['QW-BP25', 'QW-BP26']
       what: 'QualWeb'
@@ -183,15 +177,15 @@ Here is an example of a job:
 }
 ```
 
-Job properties:
+This example illustrates the properties that a job has:
 - `id`: a string uniquely identifying the job.
-- `what`: a description of the job.
-- `strict`: `true` or `false`, indicating whether _substantive redirections_ should be treated as failures. These are redirections that do more than add or subtract a final slash.
-- `standard`: whether standardized versions of tool reports are to accompany the original versions (`'also'`), replace the original versions (`'only'`), or not be produced (`'no'`).
-- `observe`: `true` or `false`, indicating whether Testarido, when performing a job for a network server, should give the server granular updates on the progress of the job.
+- `what` (optional): a description of the job.
+- `strict` (optional): `true` or `false`, indicating whether _substantive redirections_ should be treated as failures. These are redirections that do more than add or subtract a final slash. Default: `false`.
+- `standard` (optional): whether standardized versions of tool reports are to accompany the original versions (`'also'`), replace the original versions (`'only'`), or not be produced (`'no'`). Default: `'only'`.
+- `observe` (optional): `true` or `false`, indicating whether Testarido, when performing a job for a network server, should give the server granular updates on the progress of the job. Default: `false`.
 - `creationTimeStamp`: a string in `yymmddThhMM` format, describing when the job was created.
 - `executionTimeStamp`: a string in `yymmddThhMM` format, specifying a date and time before which the job is not to be performed.
-- `target` (optional): facts about the target of the job. If the job has no `target` property, then each act must have a `target` property instead.
+- `target` (optional): facts about the target of the job. If the job has no `target` property, then each act that requires a target must have its own `target` property instead.
 - `sources` (optional): data inserted into the job by the job creator for use by the job creator.
 - `acts`: an array of the acts to be performed (documented below).
 
@@ -199,11 +193,11 @@ Job properties:
 
 #### Introduction
 
-Each act object has a `type` property and optionally has a `name` property (used in branching, described below). The act must or may have other properties, depending on the value of `type`.
+Each act is specified by an object. An act must have a `type` property, identifying its type. There are two possible types: `tool` and `next`.
 
 #### Configuration
 
-The possible act types, and the requirements for acts of each type, are defined in the `actSpecs.js` file.
+The possible act types, and the requirements for acts of each type, are defined in the `actSpecs` object created by the `actSpecs.js` file. The `actSpecs` object has two properties: `etc` and `tools`. The `etc` property defines the requirements for both act types. The `tools` property defines additional requirements for acts of type `tool`.
 
 #### Branching acts
 
@@ -213,18 +207,15 @@ An act of type `next` can change the act sequence by selecting some act other th
 
 ##### Introduction
 
-An act of type `tool` performs the tests of particular rules of a tool and reports a result.
+An act of type `tool` performs tests of a tool and reports a result.
 
 The `which` property of a `tool` act identifies the tool, such as `alfa` or `testaro`.
 
 ##### Configuration
 
-The `actSpecs.js` file defines an `actSpecs` object with two properties: `etc` and `tools`. The `etc` property defines the requirements for all act types. The `tools` property defines additional requirements for particular `which` values of a `tool` act.
-
-For every value of `which` in a tool act, thare are also:
-- a property in the `tools` object defined in the `run.js` file, where the property name is the ID representing the tool and the value is the name of the tool
-- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the name of the tool
-
+Every possible value of `which` in a tool act has:
+- a property in the `tools` property of `actSpecs`, defining the ordinary-language name of the tool and any requirements imposed on tool acts with that `which` value beyond the requirements for tool acts in general
+- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the `which` value.
 
 ```javascript
 test: [

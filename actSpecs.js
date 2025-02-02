@@ -29,46 +29,6 @@
 
 exports.actSpecs = {
   etc: {
-    button: [
-      'Click a button or submit input',
-      {
-        which: [false, 'string', 'hasLength', 'substring of button text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    checkbox: [
-      'Check a checkbox',
-      {
-        which: [true, 'string', 'hasLength', 'substring of checkbox text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    focus: [
-      'Put the specified element into focus',
-      {
-        what: [true, 'string', 'isFocusable', 'selector of element to be focused'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        which: [false, 'string', 'hasLength', 'substring of element text']
-      }
-    ],
-    launch: [
-      'Launch a Playwright browser',
-      {
-        target: [false, 'object', '', 'target different from target of the job'],
-        browserID: [false, 'string', 'isBrowserID', 'browser type different from browserID of the job'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    link: [
-      'Click a link and wait for the page to be idle or loaded',
-      {
-        which: [false, 'string', 'hasLength', 'substring of link text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
     next: [
       'Specify the next command if the last result requires',
       {
@@ -80,97 +40,12 @@ exports.actSpecs = {
         what: [false, 'string', 'hasLength', 'comment']
       }
     ],
-    page: [
-      'Switch to the last-opened browser tab',
-      {
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    press: [
-      'Press a key',
-      {
-        which: [true, 'string', 'hasLength', 'key name'],
-        what: [false, 'string', 'hasLength', 'comment'],
-        again: [false, 'number', '', 'number of additional times to press the key']
-      }
-    ],
-    presses: [
-      'Repeatedly press a navigation key',
-      {
-        navKey: [true, 'string', 'hasLength', 'navigation-keyname'],
-        what: [false, 'string', 'hasLength', 'tag name of element'],
-        which: [false, 'array', 'areStrings', 'substrings any of which matches element text'],
-        text: [false, 'string', 'hasLength', 'text to enter after reaching element'],
-        action: [false, 'string', 'hasLength', 'name of key to press, after text entry if any'],
-        withItems: [true, 'boolean', '', 'itemize']
-      }
-    ],
-    radio: [
-      'Check a radio button',
-      {
-        which: [true, 'string', 'hasLength', 'substring of radio-button text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    reveal: [
-      'Make all elements visible',
-      {
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    search: [
-      'Enter text into a search input, optionally with 1 placeholder for an all-caps literal environment variable',
-      {
-        which: [false, 'string', 'hasLength', 'substring of input text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [true, 'string', 'hasLength', 'text to enter, with optional __PLACEHOLDER__']
-      }
-    ],
-    select: [
-      'Select a select option',
-      {
-        which: [false, 'string', 'hasLength', 'substring of select-list text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [true, 'string', 'hasLength', 'substring of option text content']
-      }
-    ],
-    state: [
-      'Wait until the page reaches a load state',
-      {
-        which: [true, 'string', 'isState', '“loaded” or “idle”'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    test: [
+    tool: [
       'Perform tests of a tool',
       {
         which: [true, 'string', 'isTest', 'tool name'],
         launch: [false, 'object', '', 'if new browser to be launched, properties different from target, browserID, and what of the job'],
         rules: [false, 'array', 'areStrings', 'rule IDs or (for nuVal) specifications, if not all']
-      }
-    ],
-    text: [
-      'Enter text into a text input, optionally with 1 placeholder for an all-caps literal environment variable',
-      {
-        which: [false, 'string', 'hasLength', 'substring of input text'],
-        index: [false, 'number', '', 'index among matches if not 0'],
-        what: [true, 'string', 'hasLength', 'text to enter, with optional __PLACEHOLDER__']
-      }
-    ],
-    url: [
-      'Navigate to a new URL',
-      {
-        which: [true, 'string', 'isURL', 'URL (if file://, path relative to main project directory'],
-        what: [false, 'string', 'hasLength', 'comment'],
-        id: [false, 'string', 'hasLength', 'ID of the host']
-      }
-    ],
-    wait: [
-      'Wait until something appears',
-      {
-        what: [true, 'string', 'isWaitable', 'waitable item type (url, title, or body)'],
-        which: [true, 'string', 'hasLength', 'substring of waitable-item text']
       }
     ]
   },
