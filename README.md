@@ -56,10 +56,10 @@ Testarido performs tests of an ensemble of eleven _tools_. Each tool has an ID. 
 - `axe`: [Axe](https://www.npmjs.com/package/axe-playwright) (Deque)
 - `ed11y`: [Editoria11y](https://github.com/itmaybejj/editoria11y) (Princeton University)
 - `htmlcs`: [HTML CodeSniffer](https://www.npmjs.com/package/html_codesniffer) (Squiz Labs)
-- `nu`: [Nu Html Checker](https://github.com/validator/validator) (World Wide Web Consortium)
-- `qual`: [QualWeb](https://www.npmjs.com/package/@qualweb/core) (University of Lisbon)
+- `nuval`: [Nu Html Checker](https://github.com/validator/validator) (World Wide Web Consortium)
+- `qualweb`: [QualWeb](https://www.npmjs.com/package/@qualweb/core) (University of Lisbon)
 - `testarido`: [Testarido](https://www.npmjs.com/package/testarido) (CVS Health and Jonathan Robert Pool)
-- `wax`: [WallyAX](https://www.npmjs.com/package/@wally-ax/wax-dev) (Wally Solutions)
+- `wallyax`: [WallyAX](https://www.npmjs.com/package/@wally-ax/wax-dev) (Wally Solutions)
 - `wave`: [WAVE](https://wave.webaim.org/api/) (WebAIM)
 
 Some of the tests of Testarido are designed to act as approximate alternatives to tests of vulnerable, restricted, or no longer available tools. In all such cases the Testarido rules are independently designed and implemented, without reference to the code of the tests that inspired them.
@@ -197,7 +197,7 @@ Each act is specified by an object. An act must have a `type` property, identify
 
 #### Configuration
 
-The possible act types, and the requirements for acts of each type, are defined in the `actSpecs` object created by the `actSpecs.js` file. The `actSpecs` object has two properties: `etc` and `tools`. The `etc` property defines the requirements for both act types. The `tools` property defines additional requirements for acts of type `tool`.
+The requirements for acts of each type are defined in the `actSpecs` object created by the `actSpecs.js` file. The `actSpecs` object has two properties: `etc` and `tools`. The `etc` property defines the requirements for the two act types. The `tools` property defines additional requirements for acts of type `tool`.
 
 #### Branching acts
 
@@ -209,13 +209,13 @@ An act of type `next` can change the act sequence by selecting some act other th
 
 An act of type `tool` performs tests of a tool and reports a result.
 
-The `which` property of a `tool` act identifies the tool, such as `alfa` or `testaro`.
+The `which` property of a `tool` act identifies the tool, such as `alfa` or `testarido`.
 
 ##### Configuration
 
 Every possible value of `which` in a tool act has:
 - a property in the `tools` property of `actSpecs`, defining the ordinary-language name of the tool and any requirements imposed on tool acts with that `which` value beyond the requirements for tool acts in general
-- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the `which` value.
+- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the `which` value
 
 ```javascript
 test: [

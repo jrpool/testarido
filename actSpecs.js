@@ -22,34 +22,115 @@
   SOFTWARE.
 */
 
+const { accepts } = require("express/lib/request");
+
 /*
   actSpecs
   Validator for acts of a job.
 */
 
-exports.actSpecs = {
-  etc: {
-    next: [
-      'Specify the next command if the last result requires',
-      {
-        if: [
-          true, 'array', '', 'act result property tree in a.b.c format; if to exist, also one of “<=>!” and criterion'
-        ],
-        jump: [false, 'number', '', 'offset of next command from this one, or 0 to stop'],
-        next: [false, 'string', 'hasLength', 'name of next command'],
-        what: [false, 'string', 'hasLength', 'comment']
-      }
-    ],
-    tool: [
-      'Perform tests of a tool',
-      {
-        which: [true, 'string', 'isTest', 'tool name'],
-        launch: [false, 'object', '', 'if new browser to be launched, properties different from target, browserID, and what of the job'],
-        rules: [false, 'array', 'areStrings', 'rule IDs or (for nuVal) specifications, if not all']
-      }
-    ]
-  },
-  tools: {
+// Valid values of the ifRelation property of a branch act.
+const ifRelations = ['<', '=', '>', '!', true, false];
+// Tool IDs.
+const toolIDs = [
+  'alfa',
+  'aslint',
+  'axe',
+  'ed11y',
+  'htmlcs',
+  'ibm',
+  'nuval',
+  'qualweb',
+  'testarido',
+  'wallyax',
+  'wave'
+];
+// IDs of tools that have nongeneric validity criteria.
+const specialTools = ['axe', 'ibm', 'qualweb', 'testarido', 'wave'];
+// Returns whether a branch act is valid.
+const isValidBranchAct = (report, actIndex) => {
+  const act = report[actIndex];
+  const {what, ifProperty, ifRelation, ifValue, next} = act;
+  if (
+    (what === undefined || typeof what === 'string')
+    && typeof ifProperty === 'string'
+    && ifRelations.includes(ifRelation)
+    && (ifValue === undefined || typeof ifRelation === 'string')
+    && ((
+      typeof next === number
+      && next === Math.round(next)
+      && report.acts[actIndex + next]
+      && report.acts[actIndex + next].type === 'tool'
+    )
+    || (
+      typeof next === 'string'
+      && report.acts.some(act => act.type === 'tool' && act.name === next)
+    ))
+  ) {
+    return true;
+  }
+  else {
+    return false;
+  }
+};
+// Returns whether a target is valid.
+const isValidTarget = target => typeof target === 'object'
+&& (target.what === undefined || (typeof target.what === 'string' && target.what.length))
+&& (
+  (target.url && typeof target.url === 'string' && target.url.length)
+  || (target.dom && typeof target.dom === object)
+);
+// Returns whether a tool act is specially valid.
+const isValidSpecialToolAct = act => {
+  const {which} = act;
+  if (which === 'axe') {
+    const {detailLevel} = act;
+    return [0, 1, 2, 3, 4].includes(detailLevel);
+  }
+  else if (which === 'ibm') {
+    const {withItems, withNewContent} = act;
+    return [withItems, withNewContent].every(property => typeof property === 'boolean');
+  }
+  else if (which === 'qualweb') {
+    return typeof act.withNewContent === 'boolean';
+  }
+  if (specialTools.includes(act.which)) {
+
+  }
+};
+// Returns whether a tool act is generically valid.
+const isValidToolAct = (report, actIndex) => {
+  const act = report.acts[actIndex];
+  const {what, which, name, target, rules} = act;
+  return (what === undefined || (typeof what === 'string' && what.length))
+  && toolIDs.includes(which)
+  && (name === undefined || (typeof name === 'string' && name.length))
+  && (isValidTarget(target) || (target === undefined && report.target))
+  && (
+    rules === undefined)
+    || (Array.isArray(rules) && rules.every(rule => typeof rule === 'string' && rule.length)
+  );
+};
+// Returns whether an act is valid.
+exports.isValidAct = (report, actIndex) => {
+  const act = report.acts && report.acts[actIndex];
+  if (typeof act === 'object') {
+    const {type} = act;
+    if (type === 'branch') {
+      return isValidBranchAct(report, actIndex);
+    }
+    else if (type === 'tool') {
+      return isValidToolAct(act);
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+};
+
     axe: [
       'Perform Axe tests',
       {
