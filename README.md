@@ -1,14 +1,18 @@
-# testaro
+# testarido
 
 Ensemble testing for web accessibility
 
 ## Introduction
 
-Testaro is an application for automated web accessibility testing.
+Testarido is an application for automated web accessibility testing.
 
-The purposes of Testaro are to:
+The purposes of Testarido are to:
 - provide programmatic access to accessibility tests defined by several tools
 - facilitate the integration of the reports of the tools into a unified report
+
+### Testarido and Testaro
+
+Testarido is a fork of [Testaro](https://github.com/cvs-health/testaro).
 
 Testaro is described in two papers:
 - [How to run a thousand accessibility tests](https://medium.com/cvs-health-tech-blog/how-to-run-a-thousand-accessibility-tests-63692ad120c3)
@@ -16,11 +20,15 @@ Testaro is described in two papers:
 
 The need for multi-tool integration, and its costs, are discussed in [Accessibility Metatesting: Comparing Nine Testing Tools](https://arxiv.org/abs/2304.07591).
 
-Testaro launches and controls web browsers, performing operations, conducting tests, and recording results.
+Testaro and Testarido differ in their strategies for conducting tests:
+- Testaro uses its Playwright dependency to launch and control web browsers, perform operations, conduct tests, and record results. Regardless of how the test was designed to interact with a web page, Testaro opens the page with Playwright and makes the required aspects of that Playwright page available to the test.
+- Testarido does not depend on Playwright. Testarido does whatever a test requires in order to make a web page available to that test.
 
-Testaro was designed to be a workstation-based agent, because many of the tests performed by Testaro simulate the use of a web browser on a workstation. However, Testaro can be installed under a MacOS, Windows, Debian, or Ubuntu operating system. Results of installing it on servers have not yet been reported.
+Testaro was designed to be a workstation-based agent, because some of the tests performed by Testaro simulate the use of a web browser on a workstation. However, Testaro can be installed under a MacOS, Windows, Debian, or Ubuntu operating system. Research on the deployment of Testaro in a server environment is under way. One of the findings is that Playwright throws errors if an application that has Testaro as a dependency is containerized before deployment. Because containerization is commonly a mandatory feature of deployment pipelines, this interaction can make Testaro useless as a server-hosted package even when it otherwise might perform correctly. Testarido is a response to this limitation. The intent of Testarido is to be similar to Testaro but to be server-deployable in a container.
 
-Testaro accepts _jobs_, performs them, and returns _reports_.
+### How Testarido works
+
+Testarido accepts _jobs_, performs them, and returns _reports_.
 
 Other software, located on the same or a different host, can make use of Testaro, performing functions such as:
 - Job preparation
@@ -40,12 +48,12 @@ One software product that performs some such functions is [Testilo](https://www.
 
 ## Dependencies
 
-Testaro uses:
-- [Playwright](https://playwright.dev/) to launch browsers, perform user actions in them, and perform tests
-- [playwright-dompath](https://www.npmjs.com/package/playwright-dompath) to retrieve XPaths of elements
-- [pixelmatch](https://www.npmjs.com/package/pixelmatch) to measure motion
+Testarido uses:
+- [jsdom](https://www.npmjs.com/package/jsdom) to create parsable document object models when required by tests
+- [get-xpath](https://www.npmjs.com/package/get-xpath) to retrieve XPaths of elements when tests do not do so
+- [pixelmatch](https://www.npmjs.com/package/pixelmatch) to measure motion when tests require this
 
-Testaro performs tests of these _tools_:
+Testarido performs tests of these _tools_:
 - [Accessibility Checker](https://www.npmjs.com/package/accessibility-checker) (IBM)
 - [Alfa](https://alfa.siteimprove.com/) (Siteimprove)
 - [ASLint](https://www.npmjs.com/package/@essentialaccessibility/aslint) (eSSENTIAL Accessibility)
@@ -58,11 +66,11 @@ Testaro performs tests of these _tools_:
 - [WallyAX](https://www.npmjs.com/package/@wally-ax/wax-dev) (Wally Solutions)
 - [WAVE](https://wave.webaim.org/api/) (WebAIM)
 
-Some of the tests of Testaro are designed to act as approximate alternatives to tests of vulnerable, restricted, or no longer available tools. In all such cases the Testaro rules are independently designed and implemented, without reference to the code of the tests that inspired them.
+Some of the tests of Testarido are designed to act as approximate alternatives to tests of vulnerable, restricted, or no longer available tools. In all such cases the Testarido rules are independently designed and implemented, without reference to the code of the tests that inspired them.
 
 ## Rules
 
-Each tool accessed with Testaro defines _rules_ and tests _targets_ for compliance with its rules. In total, the eleven tools define more than a thousand rules. The latest tabulation of tool rules, excluding those that have been deprecated by Testilo, is:
+Each test of a tool implements a _rule_ of that tool. A rule typically defines what makes an artifact successful or unsuccessful in some way. More generally, however, a rule defines the criteria for arriving at some result, and the result can be something other than success or failure. A rule might, for example, classify a web page. In total, the eleven tools currently integrated into Testarido define more than a thousand rules. The latest tabulation of tool rules, excluding those that have been deprecated by Testilo, is:
 
 ```
 Accessibility Checker: 93
@@ -91,49 +99,47 @@ The main directories containing code files are:
 
 ## System requirements
 
-Version 16 or later of [Node.js](https://nodejs.org/en/).
+Version 18 or later of [Node.js](https://nodejs.org/en/).
 
 ## Installation
 
 ### As an application
 
-You can clone the [Testaro repository](https://github.com/cvs-health/testaro) to install Testaro as an application:
+You can clone the [Testarido repository](https://github.com/jrpool/testarido) to install Testarido as an application:
 
 ```bash
-cd path/to/what/will/be/the/parent/directory/of/testaro
-git clone https://github.com/cvs-health/testaro.git
-cd testaro
+cd path/to/what/will/be/the/parent/directory/of/testarido
+git clone https://github.com/jrpool/testarido.git
+cd testarido
 npm install
-npx playwright install
 ```
 
-After that, you can update Testaro after any version change:
+After that, you can update Testarido after any version change:
 
 ```bash
-cd testaro
+cd testarido
 git checkout package-lock.json
 git pull
 npm update
-npx playwright install
 ```
 
 Once it is installed as an application, you can use its features with a terminal interface by executing the “By a user” statements below.
 
 ### As a dependency
 
-You can make Testaro a dependency of another application by installing it as you would install any `npm` package, such as by executing `npm install-save testaro` or including `testaro` among the dependencies in a `package.json` file.
+You can make Testarido a dependency of another application by installing it as you would install any `npm` package, such as by executing `npm install-save testarido` or including `testarido` among the dependencies in a `package.json` file.
 
-Once it is installed as a dependency, your application can use Testaro features by executing the “By a module” statements below.
+Once it is installed as a dependency, your application can use Testarido features by executing the “By a module” statements below.
 
 ### Prerequisites
 
-To make the Testaro features work, you will also need to provide the environment variables described below under “Environment variables”.
+To make the Testarido features work, you will also need to provide the environment variables described below under “Environment variables”.
 
-All of the tests that Testaro can perform are free of cost, except those performed by the WallyAX and WAVE tools. The owners of those tools issue API keys. A free initial allowance of usage may be granted to you with a new API key. Before using Testaro to perform their tests, get your API keys for [WallyAX](mailto:technology@wallyax.com) and [WAVE](https://wave.webaim.org/api/). Then use those API keys to define environment variables, as described below under “Environment variables”.
+All of the tests that Testarido can perform are free of cost, except those performed by the WallyAX and WAVE tools. The owners of those tools issue API keys. A free initial allowance of usage may be granted to you with a new API key. Before using Testarido to perform their tests, get your API keys for [WallyAX](mailto:technology@wallyax.com) and [WAVE](https://wave.webaim.org/api/). Then use those API keys to define environment variables, as described below under “Environment variables”.
 
 ## Jobs
 
-A _job_ is an object that specifies what Testaro is to do. As Testaro performs a job, Testaro reports results by adding data to the job.
+A _job_ is an object that specifies what Testarido is to do. As Testarido performs a job, Testarido reports results by adding data to the job. In doing this, Testarido converts the job into a _report_.
 
 ### Example
 
@@ -146,22 +152,6 @@ Here is an example of a job:
   strict: true,
   standard: 'also',
   observe: false,
-  device: {
-    id: 'iPhone 8',
-    windowOptions: {
-      reducedMotion: 'no-preference',
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/17.4 Mobile/15A372 Safari/604.1',
-      viewport: {
-        width: 375,
-        height: 667
-      },
-      deviceScaleFactor: 2,
-      isMobile: true,
-      hasTouch: true,
-      defaultBrowserType: 'webkit'
-    }
-  },
-  browserID: 'webkit',
   creationTimeStamp: '241229T0537',
   executionTimeStamp: '250110T1200',
   target: {
@@ -176,16 +166,14 @@ Here is an example of a job:
   },
   acts: [
     {
-      type: 'test',
-      launch: {},
+      type: 'tool',
       which: 'axe',
       detailLevel: 2,
       rules: ['landmark-complementary-is-top-level'],
       what: 'Axe'
     },
     {
-      type: 'test',
-      launch: {},
+      type: 'tool',
       which: 'qualWeb',
       withNewContent: false,
       rules: ['QW-BP25', 'QW-BP26']
@@ -195,119 +183,48 @@ Here is an example of a job:
 }
 ```
 
-This job tells Testaro to perform two acts. One performs one test of the Axe tool wih reporting at detail level 2, and the other performs two tests of the QualWeb tool.
-
-Each act includes a `launch` property with a default value. That instructs Testaro, before performing those tests, to launch a new Webkit browser, open a context (window) with some properties of an iPhone 8 and without a reduced-motion setting, create a page (tab), and navigate to a particular page of the `abccorp.com` website.
-
 Job properties:
 - `id`: a string uniquely identifying the job.
 - `what`: a description of the job.
 - `strict`: `true` or `false`, indicating whether _substantive redirections_ should be treated as failures. These are redirections that do more than add or subtract a final slash.
 - `standard`: whether standardized versions of tool reports are to accompany the original versions (`'also'`), replace the original versions (`'only'`), or not be produced (`'no'`).
-- `observe`: `true` or `false`, indicating whether tool and Testaro-rule invocations are to be reported to the server as they occur, so that the server can update a waiting client.
-- `device`: the ID of a device and the properties of each new browser context (window) that will be set for conformity to that device, unless overridden by an act. It must be `'default'` or the ID of one of [about 125 devices recognized by Playwright](https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/deviceDescriptorsSource.json).
-- `browserID`: the ID of the browser to be used, unless overridden by an act. It must be `'chromium'`, `'firefox'`, or `'webkit`'.
+- `observe`: `true` or `false`, indicating whether Testarido, when performing a job for a network server, should give the server granular updates on the progress of the job.
 - `creationTimeStamp`: a string in `yymmddThhMM` format, describing when the job was created.
 - `executionTimeStamp`: a string in `yymmddThhMM` format, specifying a date and time before which the job is not to be performed.
-- `target`: data about the target of the job, or `{}` if the job involves multiple targets.
-- `sources`: data optionally inserted into the job by the job creator for use by the job creator.
+- `target` (optional): facts about the target of the job. If the job has no `target` property, then each act must have a `target` property instead.
+- `sources` (optional): data inserted into the job by the job creator for use by the job creator.
 - `acts`: an array of the acts to be performed (documented below).
 
-## Acts
+### Acts
 
-### Introduction
+#### Introduction
 
-Each act object has a `type` property and optionally has a `name` property (used in branching, described below). It must or may have other properties, depending on the value of `type`.
+Each act object has a `type` property and optionally has a `name` property (used in branching, described below). The act must or may have other properties, depending on the value of `type`.
 
-### Act types
+#### Configuration
 
-The acts can tell Testaro to perform any of:
-- _navigations_ (browser launches, visits to URLs, waits for page conditions, etc.)
-- _moves_ (clicks, text inputs, hovers, etc.)
-- _alterations_ (changes to the page)
-- _tests_ (one or more of the tests defined by a tool)
-- _branching_ (continuing from an act other than the next one)
+The possible act types, and the requirements for acts of each type, are defined in the `actSpecs.js` file.
 
-#### Navigations
+#### Branching acts
 
-An example of a **navigation** is:
+An act of type `next` can change the act sequence by selecting some act other than the following one to be performed next.
 
-```json
-{
-  "type": "wait",
-  "which": "travel",
-  "what": "title"
-}
-```
-
-In this case, Testaro waits until the page title contains the string “travel” (case-insensitively).
-
-There is also a `launch` act. You need it in any job before other acts can be performed, unless the acts are all `test` acts and they include `launch` properties, as in the job example above. That `launch` property is a compact alternative to a `launch` act.
-
-#### Moves
-
-An example of a **move** is:
-
-```json
-{
-  "type": "radio",
-  "which": "No",
-  "index": 2,
-  "what": "No, I am not a smoker"
-}
-```
-
-In this case, Testaro checks the third radio button whose text includes the string “No” (case-insensitively).
-
-In identifying the target element for a move, Testaro matches the `which` property with the texts of the elements of the applicable type (such as radio buttons). It defines the text of an `input` element as the concatenated texts of its implicit label or explicit labels, if any, plus, for the first input in a `fieldset` element, the text content of the `legend` element of that `fieldset` element. For any other element, Testaro defines the text as the text content of the element.
-
-When the texts of multiple elements of the same type will contain the same `which` value, you can include an `index` property to specify the index of the target element, among all those that will match.
-
-#### Alterations
-
-An example of an **alteration** is:
-
-```json
-{
-  "type": "reveal",
-  "what": "make everything visible"
-}
-```
-
-This act causes Testaro to alter the `display` and `visibility` style properties of all elements, where necessary, so those properties do not make any element invisible.
-
-#### Branching
-
-An example of a **branching** act is:
-
-```json
-{
-  "type": "next",
-  "if": ["totals.invalid", ">", 0],
-  "jump": -4,
-  "what": "redo search if any invalid elements"
-}
-```
-
-This act checks the result of the previous act to determine whether its `result.totals.invalid` property has a positive value. If so, it changes the next act to be performed, specifying the act 4 acts before this one.
-
-A `next` act can use a `next` property instead of a `jump` property. The value of the `next` property is an act name. It tells Testaro to continue performing acts starting with the act having that value as the value of its `name` property.
-
-#### Tests
+#### Tool acts
 
 ##### Introduction
 
-An act of type `test` performs the tests of a tool and reports a result. The result may indicate that a page passes or fails requirements. Typically, accessibility tests report successes and failures. But a test in Testaro is defined less restrictively, so it can report any result. As one example, the Testaro `elements` test reports facts about certain elements on a page, without asserting that those facts are successes or failures.
+An act of type `tool` performs the tests of particular rules of a tool and reports a result.
 
-The `which` property of a `test` act identifies a tool, such as `alfa` or `testaro`.
+The `which` property of a `tool` act identifies the tool, such as `alfa` or `testaro`.
 
 ##### Configuration
 
-Every tool invoked by Testaro must have:
-- a property in the `tests` object defined in the `run.js` file, where the property name is the ID representing the tool and the value is the name of the tool
-- a `.js` file, defining the operation of the tool, in the `tests` directory, whose name base is the name of the tool
+The `actSpecs.js` file defines an `actSpecs` object with two properties: `etc` and `tools`. The `etc` property defines the requirements for all act types. The `tools` property defines additional requirements for particular `which` values of a `tool` act.
 
-The `actSpecs.js` file (described in detail below) contains a specification for any `test` act, namely:
+For every value of `which` in a tool act, thare are also:
+- a property in the `tools` object defined in the `run.js` file, where the property name is the ID representing the tool and the value is the name of the tool
+- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the name of the tool
+
 
 ```javascript
 test: [
