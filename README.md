@@ -187,29 +187,15 @@ This example illustrates the properties that a job has:
 - `executionTimeStamp`: a string in `yymmddThhMM` format, specifying a date and time before which the job is not to be performed.
 - `target` (optional): facts about the target of the job. If the job has no `target` property, then each act that requires a target must have its own `target` property instead.
 - `sources` (optional): data inserted into the job by the job creator for use by the job creator.
-- `acts`: an array of the acts to be performed (documented below).
+- `acts`: an array of the acts to be performed.
 
-### Acts
+These properties are subject to some validity constraints. Testaro uses functions in the `procs/job` module to check compliance with the constraints and performs a job only if it is compliant.
+
+### Tool acts
 
 #### Introduction
 
-Each act is specified by an object. An act must have a `type` property, identifying its type. There are two possible types: `tool` and `next`.
-
-#### Configuration
-
-The requirements for acts of each type are defined in the `actSpecs` object created by the `actSpecs.js` file. The `actSpecs` object has two properties: `etc` and `tools`. The `etc` property defines the requirements for the two act types. The `tools` property defines additional requirements for acts of type `tool`.
-
-#### Branching acts
-
-An act of type `next` can change the act sequence by selecting some act other than the following one to be performed next.
-
-#### Tool acts
-
-##### Introduction
-
-An act of type `tool` performs tests of a tool and reports a result.
-
-The `which` property of a `tool` act identifies the tool, such as `alfa` or `testarido`.
+An act of type `tool` performs tests of a tool and reports a result. The example above contains two tool acts. Tool acts differ in some ways from one tool to another, as required by the tools. When Testaro begins to perform a job, Testaro checks the job, including its tool acts, for validity.
 
 ##### Configuration
 

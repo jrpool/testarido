@@ -134,6 +134,135 @@ const areNumbers = array => array.every(element => typeof element === 'number');
 const areStrings = array => array.every(element => typeof element === 'string');
 // Returns whether all properties of an object have array values.
 const areArrays = object => Object.values(object).every(value => Array.isArray(value));
+// Valid values of the ifRelation property of a branch act.
+const ifRelations = ['<', '=', '>', '!', true, false];
+// Tool IDs.
+const toolIDs = [
+  'alfa',
+  'aslint',
+  'axe',
+  'ed11y',
+  'htmlcs',
+  'ibm',
+  'nuval',
+  'qualweb',
+  'testarido',
+  'wallyax',
+  'wave'
+];
+// Returns whether a branch act is valid.
+const isValidBranchAct = (report, actIndex) => {
+  const act = report[actIndex];
+  const {what, ifProperty, ifRelation, ifValue, next} = act;
+  if (
+    (what === undefined || typeof what === 'string')
+    && typeof ifProperty === 'string'
+    && ifRelations.includes(ifRelation)
+    && (ifValue === undefined || typeof ifRelation === 'string')
+    && ((
+      typeof next === number
+      && next === Math.round(next)
+      && report.acts[actIndex + next]
+      && report.acts[actIndex + next].type === 'tool'
+    )
+    || (
+      typeof next === 'string'
+      && report.acts.some(act => act.type === 'tool' && act.name === next)
+    ))
+  ) {
+    return true;
+  }
+  else {
+    return false;
+  }
+};
+// Returns whether a target is valid.
+const isValidTarget = target => typeof target === 'object'
+&& (target.what === undefined || (typeof target.what === 'string' && target.what.length))
+&& (
+  (target.url && typeof target.url === 'string' && target.url.length)
+  || (target.dom && typeof target.dom === object)
+);
+// Returns whether a tool act is specially valid.
+const isValidSpecialToolAct = act => {
+  const {which} = act;
+  if (which === 'axe') {
+    const {detailLevel} = act;
+    return [0, 1, 2, 3, 4].includes(detailLevel);
+  }
+  else if (which === 'ibm') {
+    const {withItems, withNewContent} = act;
+    return [withItems, withNewContent].every(property => typeof property === 'boolean');
+  }
+  else if (which === 'qualweb') {
+    return typeof act.withNewContent === 'boolean';
+  }
+  else if (which === 'testarido') {
+    const {withItems, stopOnFail, args} = act;
+    return [withItems, stopOnFail].every(property => typeof property === 'boolean')
+    && (
+      args === undefined
+      || typeof args === 'object' && Object.values(args).every(value => Array.isArray(value))
+    );
+  }
+  else if (which === 'wave') {
+    const {reportType, preScript, postScript} = act;
+    return [1, 2, 3, 4].includes(reportType)
+    && [preScript, postScript]
+    .every(script => script === undefined || typeof script === 'string' && script.length);
+  }
+  else {
+    return true;
+  }
+};
+// Returns whether a tool act is valid.
+const isValidToolAct = (report, actIndex) => {
+  const act = report.acts[actIndex];
+  const {what, which, name, target, rules, expect} = act;
+  return (what === undefined || (typeof what === 'string' && what.length))
+  && toolIDs.includes(which)
+  && (name === undefined || (typeof name === 'string' && name.length))
+  && (isValidTarget(target) || (target === undefined && report.target))
+  && (
+    rules === undefined)
+    || (Array.isArray(rules) && rules.every(rule => typeof rule === 'string' && rule.length)
+  )
+  && (
+    expect === undefined
+    || Array.isArray(expect) && expect.every(
+      expectation => Array.isArray(expectation)
+      && (
+        expectation.length === 1 || (
+          expectation.length === 3
+          && typeof expectation[0] === 'string'
+          && expectation[0].length
+          && ['<', '=', '>', '!', 'i', 'e'].some(operator => expectation[1] === operator)
+          && ['string', 'number'].some(type => typeof expectation[2] === type)
+        )
+      )
+    )
+  )
+  && isValidSpecialToolAct(act);
+};
+// Returns whether an act is valid.
+exports.isValidAct = (report, actIndex) => {
+  const act = report.acts && report.acts[actIndex];
+  if (typeof act === 'object') {
+    const {type} = act;
+    if (type === 'branch') {
+      return isValidBranchAct(report, actIndex);
+    }
+    else if (type === 'tool') {
+      return isValidToolAct(act);
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+};
 // Validates an act by reference to actSpecs.js.
 const isValidAct = exports.isValidAct = act => {
   // Identify the type of the act.
