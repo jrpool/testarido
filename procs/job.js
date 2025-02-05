@@ -215,6 +215,36 @@ const isValidSpecialToolAct = act => {
     return true;
   }
 };
+// Returns whether the rules property of a qualweb tool act is valid.
+const areValidQualwebRules = rules => {
+  const segments = rules.split(':');
+  if (segments.length === 2 && segments[0].length) {
+    const qwModule = segments[0];
+    if (['act', 'wcag', 'best'].includes(qwModule)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+};
+// Returns whether the rules property of a tool act is valid.
+const areValidRules = (toolID, rules) => {
+  if (toolID === 'qualweb') {
+    return areValidQualwebRules(rules);
+  }
+  else {
+    if (rules.length > 1 && ['y', 'n'].includes(rules[0])) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+};
 // Returns whether a tool act is valid.
 const isValidToolAct = (report, actIndex) => {
   const act = report.acts[actIndex];
@@ -224,8 +254,10 @@ const isValidToolAct = (report, actIndex) => {
   && (name === undefined || (typeof name === 'string' && name.length))
   && (isValidTarget(target) || (target === undefined && report.target))
   && (
-    rules === undefined)
-    || (Array.isArray(rules) && rules.every(rule => typeof rule === 'string' && rule.length)
+    rules === undefined
+    || Array.isArray(rules)
+    && rules.every(rule => typeof rule === 'string')
+    && areValidRules(which, rules)
   )
   && (
     expect === undefined
@@ -245,7 +277,7 @@ const isValidToolAct = (report, actIndex) => {
   && isValidSpecialToolAct(act);
 };
 // Returns whether an act is valid.
-exports.isValidAct = (report, actIndex) => {
+const isValidAct = (report, actIndex) => {
   const act = report.acts && report.acts[actIndex];
   if (typeof act === 'object') {
     const {type} = act;
@@ -260,53 +292,6 @@ exports.isValidAct = (report, actIndex) => {
     }
   }
   else {
-    return false;
-  }
-};
-// Validates an act by reference to actSpecs.js.
-const isValidAct = exports.isValidAct = act => {
-  // Identify the type of the act.
-  const type = act.type;
-  // If the type exists and is known:
-  if (type && actSpecs.etc[type]) {
-    // Copy the validator of the type for possible expansion.
-    const validator = Object.assign({}, actSpecs.etc[type][1]);
-    // If the type is test:
-    if (type === 'test') {
-      // Identify the test.
-      const toolName = act.which;
-      // If one was specified and is known:
-      if (toolName && tools[toolName]) {
-        // If it has special properties:
-        if (actSpecs.tools[toolName]) {
-          // Expand the validator by adding them.
-          Object.assign(validator, actSpecs.tools[toolName][1]);
-        }
-      }
-      // Otherwise, i.e. if no or an unknown test was specified:
-      else {
-        // Return invalidity.
-        return false;
-      }
-    }
-    // Return whether the act is valid.
-    return Object.keys(validator).every(property => {
-      if (property === 'name') {
-        return true;
-      }
-      else {
-        const vP = validator[property];
-        const aP = act[property];
-        // If it is optional and omitted or is present and valid:
-        const optAndNone = ! vP[0] && ! aP;
-        const isValid = aP !== undefined && hasType(aP, vP[1]) && hasSubtype(aP, vP[2]);
-        return optAndNone || isValid;
-      }
-    });
-  }
-  // Otherwise, i.e. if the act has an unknown or no type:
-  else {
-    // Return invalidity.
     return false;
   }
 };

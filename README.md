@@ -189,35 +189,13 @@ This example illustrates the properties that a job has:
 - `sources` (optional): data inserted into the job by the job creator for use by the job creator.
 - `acts`: an array of the acts to be performed.
 
-These properties are subject to some validity constraints. Testaro uses functions in the `procs/job` module to check compliance with the constraints and performs a job only if it is compliant.
+These properties are subject to validity constraints. Testaro uses the `isValidJob` function in the `procs/job` module to check compliance with the constraints and performs a job only if it is valid.
 
 ### Tool acts
 
 #### Introduction
 
-An act of type `tool` performs tests of a tool and reports a result. The example above contains two tool acts. Tool acts differ in some ways from one tool to another, as required by the tools. When Testaro begins to perform a job, Testaro checks the job, including its tool acts, for validity.
-
-##### Configuration
-
-Every possible value of `which` in a tool act has:
-- a property in the `tools` property of `actSpecs`, defining the ordinary-language name of the tool and any requirements imposed on tool acts with that `which` value beyond the requirements for tool acts in general
-- a `.js` file, defining the operation of the tool, in the `tools` directory, whose name base is the `which` value
-
-```javascript
-test: [
-  'Perform a test',
-  {
-    which: [true, 'string', 'isTest', 'test name'],
-    launch: [false, 'object', '', 'if new browser to be launched, properties different from target, browserID, and what of the job'],
-    rules: [false, 'array', 'areStrings', 'rule IDs or specifications, if not all']
-    what: [false, 'string', 'hasLength', 'comment']
-  }
-],
-```
-
-That means that a test act (i.e. an act with a `type` property having the value `'test'`) must have a string-valued `which` property naming a tool and may optionally have an object-valued `launch` property, an array-valued `rules` property, and/or a string-valued `what` property.
-
-If a particular test act either must have or may have any other properties, those properties are specified in the `tools` property in `actSpecs.js`.
+An act of type `tool` (like the two acts in the above example job) performs tests of a tool and reports a result. Tool acts need to comply with the requirements of their respective tools, so some tool-specific requirements apply and are enforced by the above-mentioned `isValidJob` function.
 
 When you include a `rules` property, you limit the tests of the tool that are performed or reported. For some tools (`alfa`, `axe`, `htmlcs`, `qualWeb`, `testaro`, and `wax`), only the specified tests are performed. Other tools (`aslint`, `ed11y`, `ibm`, `nuVal`, and `wave`) do not allow such a limitation, so, for those tools, all tests are performed but results are reported from only the specified tests.
 
