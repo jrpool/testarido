@@ -195,37 +195,9 @@ These properties are subject to validity constraints. Testaro uses the `isValidJ
 
 #### Introduction
 
-An act of type `tool` (like the two acts in the above example job) performs tests of a tool and reports a result. Tool acts need to comply with the requirements of their respective tools, so some tool-specific requirements apply and are enforced by the above-mentioned `isValidJob` function.
+An act of type `tool` (like the two acts in the above example job) performs tests of a tool and reports a result. Tool acts need to comply with the requirements of their respective tools; some tool-specific requirements apply and are enforced by the above-mentioned `isValidJob` function.
 
-When you include a `rules` property, you limit the tests of the tool that are performed or reported. For some tools (`alfa`, `axe`, `htmlcs`, `qualWeb`, `testaro`, and `wax`), only the specified tests are performed. Other tools (`aslint`, `ed11y`, `ibm`, `nuVal`, and `wave`) do not allow such a limitation, so, for those tools, all tests are performed but results are reported from only the specified tests.
-
-The `nuVal`, `qualWeb`, and `testaro` tools require specific formats for the `rules` property. Those formats are described below in the sections about those tools.
-
-##### Examples
-
-An example of a `test` act is:
-
-```json
-{
-  "type": "test",
-  "which": "wave",
-  "reportType": 1,
-  "what": "WAVE summary"
-}
-```
-
-Most tools allow you to decide which of their rules to apply. In effect, this means deciding which of their tests to run, since each test is considered a test of some rule. The act example
-
-```javaScript
-{
-  type: 'test',
-  which: 'alfa',
-  what: 'Siteimprove alfa tool',
-  rules: ['y', 'r25', 'r71']
-}
-```
-
-specifies that the tests for rules `r25` and `r71` of the `alfa` tool are to be performed. If the `'y'` in the `rules` array were `'n'` instead, the act would specify that all the tests of the `alfa` tool **except** those for rules `r25` and `r71` are to be run.
+When you include a `rules` property in a tool act, you limit the tests of the tool that are performed or reported. For some tools (`alfa`, `axe`, `htmlcs`, `qualWeb`, `testaro`, and `wax`), only the specified tests are performed. Other tools (`aslint`, `ed11y`, `ibm`, `nuVal`, and `wave`) do not allow such a limitation, so, for those tools, all tests are performed but Testaro reports the results from only the specified tests.
 
 One of the tools that allows rule selection, Testaro, has some rules that take additional arguments. As prescribed in `actSpecs.js`, you can pass such additional arguments to the `reporter` functions of those Testaro tests with an `args` property. Example:
 

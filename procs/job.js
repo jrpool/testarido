@@ -215,6 +215,15 @@ const isValidSpecialToolAct = act => {
     return true;
   }
 };
+// Returns whether the rules property of a nuval tool act is valid.
+const areValidNuvalRules = rules => {
+  if (rules.length > 1 && rules.every(rule => rule.length)) {
+    return ['=', '~'].includes(rules[0]);
+  }
+  else {
+    return false;
+  }
+};
 // Returns whether the rules property of a qualweb tool act is valid.
 const areValidQualwebRules = rules => {
   const segments = rules.split(':');
@@ -231,18 +240,28 @@ const areValidQualwebRules = rules => {
     return false;
   }
 };
-// Returns whether the rules property of a tool act is valid.
-const areValidRules = (toolID, rules) => {
-  if (toolID === 'qualweb') {
-    return areValidQualwebRules(rules);
+// Returns whether the rules property of a testaro tool act is valid.
+const areValidTestaroRules = rules => {
+  if (rules.length > 1 && rules.every(rule => rule.length)) {
+    return ['y', 'n'].includes(rules[0]);
   }
   else {
-    if (rules.length > 1 && ['y', 'n'].includes(rules[0])) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return false;
+  }
+};
+// Returns whether the rules property of a tool act is valid.
+const areValidRules = (toolID, rules) => {
+  if (toolID === 'nuval') {
+    return areValidNuvalRules(rules);
+  }
+  else if (toolID === 'qualweb') {
+    return areValidQualwebRules(rules);
+  }
+  else if (toolID === 'testaro') {
+    return areValidTestaroRules(rules);
+  }
+  else {
+    return rules.length && rules.every(rule => rule.length);
   }
 };
 // Returns whether a tool act is valid.
