@@ -264,10 +264,55 @@ const areValidRules = (toolID, rules) => {
     return rules.length && rules.every(rule => rule.length);
   }
 };
+// Returns whether the args property of a testaro tool act is valid.
+const areValidTestaroArgs = act => {
+  const {rules, args} = act;
+  const argRules = ['attVal', 'autocomplete', 'buttonMenu', 'elements', 'hovInd', 'textNodes'];
+  argRules.forEach(argRule => {
+    const isTested = rules[0] === 'y' && rules.includes(argRule)
+    || rules[0] === 'n' && ! rules.includes(argRule);
+    if (isTested) {
+      if (argRule === 'attVal') {
+        return args.length === 3
+        && typeof args[0] === 'string' && args[0].length
+        && typeof args[1] === boolean
+        && Array.isArray(args[2]) && args[2].length;
+      }
+      else if (argRule === 'autocomplete') {
+        return args.length === 3
+        && args.every(
+          arg => Array.isArray(arg)
+          && arg.length
+          && arg.every(item => typeof item === 'string' && item.length)
+        );
+      }
+      else if (argRule === 'buttonMenu') {
+        return args.length && args.every(arg => ['Home', 'End', '-', '+'].includes(arg));
+      }
+      else if (argRule === 'elements') {
+        return (args[0] === undefined || [1, 2, 3].includes(args[0]))
+        && (args[1] === undefined || typeof args[1] === 'string' && args[1].length)
+        && (args[2] === undefined || typeof args[2] === 'boolean')
+        && (args[3] === undefined || typeof args[3] === 'streng' && args[3].length);
+      }
+      else if (argRule === 'hovInd') {
+        return args[0] === undefined
+        || typeof args[0] === 'number' && args[0] === Math.round(args[0]);
+      }
+      else if (argRule === 'textNodes') {
+        return typeof args[0] === 'number' && args[0] === Math.round(args[0]) && args[0] >= 0
+        && (args[1] === undefined || typeof args[1] === 'string');
+      }
+      else {
+        return true;
+      }
+    }
+  });
+};
 // Returns whether a tool act is valid.
 const isValidToolAct = (report, actIndex) => {
   const act = report.acts[actIndex];
-  const {what, which, name, target, rules, expect} = act;
+  const {what, which, name, target, rules, args, expect} = act;
   return (what === undefined || (typeof what === 'string' && what.length))
   && toolIDs.includes(which)
   && (name === undefined || (typeof name === 'string' && name.length))
@@ -278,6 +323,7 @@ const isValidToolAct = (report, actIndex) => {
     && rules.every(rule => typeof rule === 'string')
     && areValidRules(which, rules)
   )
+  && areValidTestaroArgs(act)
   && (
     expect === undefined
     || Array.isArray(expect) && expect.every(

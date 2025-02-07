@@ -199,37 +199,20 @@ An act of type `tool` (like the two acts in the above example job) performs test
 
 When you include a `rules` property in a tool act, you limit the tests of the tool that are performed or reported. For some tools (`alfa`, `axe`, `htmlcs`, `qualWeb`, `testaro`, and `wax`), only the specified tests are performed. Other tools (`aslint`, `ed11y`, `ibm`, `nuVal`, and `wave`) do not allow such a limitation, so, for those tools, all tests are performed but Testaro reports the results from only the specified tests.
 
-One of the tools that allows rule selection, Testaro, has some rules that take additional arguments. As prescribed in `actSpecs.js`, you can pass such additional arguments to the `reporter` functions of those Testaro tests with an `args` property. Example:
+#### Expectations
 
-```javaScript
-{
-  type: 'test',
-  which: 'testaro',
-  what: 'Testaro tool',
-  rules: ['y', 'hover', 'focInd'],
-  args: {
-    hover: [20],
-    focInd: [false, 300]
-  }
-}
-```
+Any tool act can contain an `expect` property. If it does, the value of that property must be an array of arrays. Each array specifies expectations about the results of the operation of the tool.
 
-This act specifies that the Testaro test `hover` is to be performed with the additional argument `20`, and `focInd` is to be performed with the additional arguments `false` and `300`.
-
-##### Expectations
-
-Any `test` act can contain an `expect` property. If it does, the value of that property must be an array of arrays. Each array specifies expectations about the results of the operation of the tool.
-
-For example, a `test` act might have this `expect` property:
+For example, a tool act might have this `expect` property:
 
 ```javaScript
 'expect': [
   ['standardResult.totals.0', '=', 0],
-  ['standardResult.instances.length', '=', 0]
+  ['standardResult.instances.length', '>', 0]
 ]
 ```
 
-That would state the expectations that the `standardResult` property of the act will report no rule violations at severity level 0 and no instances of rule violations.
+That would state the expectations that the `standardResult` property of the act will report no rule violations at severity level 0 and 1 or more instances of rule violations.
 
 The first item in each array is an identifier of a property of the act. The item has the format of a string with `.` delimiters. Each `.`-delimited segment its the name of the next property in the hierarchy. If the current object is an array, the next segment must be a non-negative integer, representing the index of an element of the array.
 
@@ -245,13 +228,13 @@ The second item in each array, if there are 3 items, is an operator, drawn from:
 
 The third item in each array, if there are 3 items in the array, is the criterion with which the value of the first property is compared.
 
-A typical use for an `expect` property is checking the correctness of a Testaro test. Thus, the validation jobs in the `validation/tests/jobs` directory all contain `test` acts with `expect` properties. See the “Validation” section below.
+A typical use for an `expect` property is checking the correctness of a Testaro test. Thus, the validation jobs in the `validation/tests/jobs` directory all contain tool acts with `expect` properties. See the “Validation” section below.
 
-When a `test` act has an `expect` property, the result for that act has an `expectations` property reporting whether the expectations were satisfied. The value of `expectations` is an array of objects, one object per expectation. Each object includes a `property` property identifying the expectation, and a `passed` property with `true` or `false` value reporting whether the expectation was satisfied. If applicable, it also has other properties identifying what was expected and what was actually reported.
+When a tool act has an `expect` property, the result for that act has an `expectations` property reporting whether the expectations were satisfied. The value of `expectations` is an array of objects, one object per expectation. Each object includes a `property` property identifying the expectation, and a `passed` property with `true` or `false` value reporting whether the expectation was satisfied. If applicable, it also has other properties identifying what was expected and what was actually reported.
 
 ### Tools
 
-The tools whose tests Testaro performs have particularities described below.
+Some of the tools whose tests Testaro performs have particularities described below.
 
 #### ASLint
 
@@ -393,58 +376,6 @@ and the other test act can specify the rules as
 ```
 
 Together, they get all tests of the tool performed. Before each test act, you can ensure that the latest `launch` act has specified the browser type to be used in that test act.
-
-### `actSpecs` file
-
-#### Introduction
-
-The `actSpecs.js` file contains rules governing acts. The rules determine whether an act is valid.
-
-#### Rule format
-
-The rules in `actSpecs.js` are organized into two objects, `etc` and `tests`. The `etc` object contains rules for acts of all types. The `tools` object contains additional rules that apply to some acts of type `test`, depending on the values of their `which` properties, namely which tools they perform tests of.
-
-Here is an example of an act:
-
-```json
-{
-  "type": "link",
-  "which": "warming",
-  "what": "article on climate change"
-}
-```
-
-And here is the applicable property of the `etc` object in `actSpecs.js`:
-
-```js
-link: [
-  'Click a link',
-  {
-    which: [true, 'string', 'hasLength', 'substring of the link text'],
-    what: [false, 'string', 'hasLength', 'comment']
-  }
-]
-```
-
-The rule is an array with two elements: a string ('Click a link') describing the act and an object containing requirements for any act of type `link`.
-
-The requirement `which: [true, 'string', 'hasLength', 'substring of the link text']` specifies what is required for the `which` property of a `link`-type act. The requirement is an array.
-
-In most cases, the array has length 4:
-- 0. Is the property (here `which`) required (`true` or `false`)? The value `true` here means that every `link`-type act **must** contain a `which` property.
-- 1. What format must the property value have (`'string'`, `'array'`, `'boolean'`, `'number'`, or `'object'`)?
-- 2. What other validity criterion applies (if any)? (Empty string if none.) The `hasLength` criterion means that the string must be at least 1 character long.
-- 3. Description of the property. In this example, the description says that the value of `which` must be a substring of the text content of the link that is to be clicked. Thus, a `link` act tells Testaro to find the first link whose text content has this substring and click it.
-
-The validity criterion named in item 2 may be any of these:
-- `'hasLength'`: is not a blank string
-- `'isURL`': is a string starting with `http`, `https`, or `file`, then `://`, then ending with 1 or more non-whitespace characters
-- `'isBrowserType'`: is `'chromium'`, `'firefox'`, or `'webkit'`
-- `'isFocusable'`: is `'a'`, `'button'`, `'input'`, `'select'`, or `'option'`
-- `'isState'`: is `'loaded'` or `'idle'`
-- `'isTest'`: is the name of a tool
-- `'isWaitable'`: is `'url'`, `'title'`, or `'body'`
-- `'areStrings'`: is an array of strings
 
 ## Reports
 
